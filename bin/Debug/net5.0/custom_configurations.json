@@ -1,0 +1,10 @@
+{
+    "Paths":{
+        "Url_Account":"account.namaari.net.co",
+        "Url_Confirm":"confirm.dns.co.den.net",
+        "Url_Register":"RandomUser"
+    },
+    "KeyVault":{
+        "PublicKey":"From custom_configuration"
+    }
+}
