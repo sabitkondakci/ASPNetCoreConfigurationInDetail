@@ -45,6 +45,10 @@ namespace Configure
             services.Configure<CustomOptions>(Configuration.GetSection("keyvault")); //weatherforecastcontroller.cs di in constructor!
             services.Configure<CustomOptions>(Configuration.GetSection("secrets"));//weatherforecastcontroller.cs IOptions<CustomOptions>() in constructor!
             //for sensitive informations you may use key vaults, ex. AzureKeyVault
+            
+            // configuration for writable appsettings.Development.json
+            services.ConfigureWritable<AppSettings>(Configuration.
+                GetSection("AppSettings"),"appsettings.Development.json");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
