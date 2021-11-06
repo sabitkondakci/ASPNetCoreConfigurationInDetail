@@ -26,7 +26,6 @@ namespace BackgroundHostService
             Configuration = configuration;
             _options = options;
         }
-
         public IWebHostEnvironment WebHost { get; }
         public IHardwareInfo HardwareInfo { get; }
         public IConfiguration Configuration { get; }
@@ -40,7 +39,9 @@ namespace BackgroundHostService
 
             if (isStored == "0")
             {
-                await SaveToFileAsync($"Date: {DateTime.Now}\n");
+                await SaveToFileAsync($"Date: {DateTime.Now}\n",
+                    cancellationToken);
+
                 var tasks = new Task<string>[5];
                 tasks[0] = LogCPUInfoAsync();
                 tasks[1] = LogMemoryInfoAsync();
@@ -51,7 +52,7 @@ namespace BackgroundHostService
                 for (int i = 0; i < 5; i++)
                 {
                     string result = await tasks[i];
-                    await SaveToFileAsync(result);
+                    await SaveToFileAsync(result,cancellationToken);
                 }
 
                 // recurring events can be added here
@@ -63,7 +64,6 @@ namespace BackgroundHostService
                });
             }
         }
-
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             string isStored = Configuration.
@@ -72,17 +72,18 @@ namespace BackgroundHostService
             if (isStored == "0")
             {
                 await SaveToFileAsync($"Date: {DateTime.Now} System Stopped!\n" +
-                        $"-------------------------------------------------------"); 
+                        $"-------------------------------------------------------",
+                        cancellationToken); 
             }
         }
-
-        private async Task SaveToFileAsync(string message)
+        private async Task SaveToFileAsync(string message,
+            CancellationToken cancellation)
         {
             var path = $@"{WebHost.ContentRootPath}\{fileName}";
-            await using var save = new StreamWriter(path, true);     
-            await save.WriteLineAsync(message);    
+            await using var save = new StreamWriter(path, true);
+            var stringBuilder = new StringBuilder(message);
+            await save.WriteLineAsync(stringBuilder,cancellation);    
         }
-
         public Task<string> LogCPUInfoAsync()
         {
             HardwareInfo.RefreshCPUList();
@@ -101,7 +102,6 @@ namespace BackgroundHostService
 
             return Task.FromResult(cpuInfo.ToString());
         }
-
         public Task<string> LogMemoryInfoAsync()
         {
             HardwareInfo.RefreshMemoryList();
@@ -118,7 +118,6 @@ namespace BackgroundHostService
 
             return Task.FromResult(memoryInfo.ToString());
         }
-
         public Task<string> LogMemoryStatusInfoAsync()
         {
             HardwareInfo.RefreshMemoryStatus();
@@ -146,7 +145,6 @@ namespace BackgroundHostService
 
             return Task.FromResult(memoryStatus);
         }
-
         public Task<string> LogDriverInfoAsync()
         {
             HardwareInfo.RefreshDriveList();
@@ -162,7 +160,6 @@ namespace BackgroundHostService
 
             return Task.FromResult(driverInfo.ToString());
         }
-
         public Task<string> LogBIOSInfoAsync()
         {
             HardwareInfo.RefreshBIOSList();
